@@ -20,11 +20,28 @@ datasource db {
 //   posts Post[]
 // }
 model User {
-  id              Int      @id @default(autoincrement())
-  firstName       String
-  lastName        String
-  email           String?
-  username        String   @unique
+  id         Int         @id @default(autoincrement())
+  email           String      @unique
   password        String
-  dateTimeCreated DateTime @default(now())
+  username        String      @unique
+  firstName       String      @map("first_name")
+  lastName        String      @map("last_name")
+  dateCreated     DateTime    @default(now()) @map("date_created")
+  dateUpdated     DateTime    @updatedAt @map("date_updated")
+
+  quotes          Quote[]
+}
+
+model Quote {
+  id              Int         @id @default(autoincrement())
+  content         String      
+  author          User        @relation(fields: [authorId], references: [id])
+  authorId        Int         @map("author_id")
+}
+
+model Author {
+  id              Int         @id
+  firstName       String?     @map("first_name")
+  lastName        String?     @map("last_name")
+  dateBorn        DateTime?   @map("date_born")
 }
