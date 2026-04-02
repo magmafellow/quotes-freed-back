@@ -13,17 +13,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service.js';
-import {
-  createUserSchema,
-  type UpdateUserDto,
-  type CreateUserDto,
-  updateUserSchema,
-} from '../_zod/user.js';
 import { ZodValidationPipe } from '../_pipes/validation.pipe.js';
 import { Public } from '../_decorators/public.decorator.js';
 import { Roles } from '../_decorators/roles.decorator.js';
 import { RolesGuard } from '../_guargs/role.guard.js';
 import { Role } from '../_types/role.enum.js';
+import { type CreateUserDto, createUserSchema } from './dto/create-user.dto.js';
+import { type UpdateUserDto, updateUserSchema } from './dto/update-user.dto.js';
 
 @Controller('user')
 export class UserController {
@@ -31,7 +27,7 @@ export class UserController {
 
   @Post()
   @UsePipes(new ZodValidationPipe(createUserSchema))
-  create(@Body() createUserDto: CreateUserDto) {
+  async create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
@@ -39,19 +35,19 @@ export class UserController {
   @Get()
   @Roles(Role.Admin)
   @UseGuards(RolesGuard)
-  findAll(
+  async findAll(
     @Query('limit', new DefaultValuePipe(999), ParseIntPipe) limit: number,
   ) {
     return this.userService.findAll(limit);
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOne(id);
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body(new ZodValidationPipe(updateUserSchema)) updateUserDto: UpdateUserDto,
   ) {
@@ -59,7 +55,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+  async remove(@Param('id', ParseIntPipe) id: number) {
     return this.userService.remove(id);
   }
 }

@@ -1,14 +1,20 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service.js';
-import { CreateUserDto, UpdateUserDto } from '../_zod/user.js';
 import { TDefaultResponse } from '../_types/response.js';
+import { type CreateUserDto } from './dto/create-user.dto.js';
+import { type UpdateUserDto } from './dto/update-user.dto.js';
+import {
+  type ShowUserFullDto,
+  type ShowUserDefaultDto,
+  makeUserDefaultFromUserFull,
+} from './dto/show-user.dto.js';
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async create(
     createUserDto: CreateUserDto,
-  ): Promise<TDefaultResponse & { data: any }> {
+  ): Promise<TDefaultResponse<ShowUserFullDto>> {
     // return `Created new user \n\n ${JSON.stringify(createUserDto, null, 4)}`;
     try {
       const r = await this.prisma.user.create({ data: createUserDto });
@@ -27,15 +33,18 @@ export class UserService {
     }
   }
 
-  async findAll(limit: number) {
+  async findAll(
+    limit: number,
+  ): Promise<TDefaultResponse<ShowUserDefaultDto[]>> {
     // console.log('taken limit: ', limit)
     try {
       const r = await this.prisma.user.findMany({ take: limit });
+      const filterUsers = r.map((elem) => makeUserDefaultFromUserFull(elem));
       return {
         statusCode: 200,
         message: `Successfuly found all user with limit=${limit}`,
         isError: false,
-        data: r,
+        data: filterUsers,
       };
     } catch (error: any) {
       throw new BadRequestException('Database find all failed', {
@@ -46,7 +55,7 @@ export class UserService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<TDefaultResponse<ShowUserDto>> {
     try {
       const r = await this.prisma.user.findUniqueOrThrow({
         where: {
@@ -67,7 +76,9 @@ export class UserService {
       });
     }
   }
-  async findOneByUsername(username: string) {
+  async findOneByUsername(
+    username: string,
+  ): Promise<TDefaultResponse<ShowUserDto>> {
     try {
       const r = await this.prisma.user.findUniqueOrThrow({
         where: {
@@ -89,7 +100,10 @@ export class UserService {
     }
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<TDefaultResponse<ShowUserDto>> {
     try {
       const r = await this.prisma.user.update({
         data: updateUserDto,
@@ -110,7 +124,7 @@ export class UserService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<TDefaultResponse<ShowUserDto>> {
     try {
       const r = await this.prisma.user.delete({ where: { id } });
       return {

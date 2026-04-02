@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCatDto } from './dto/create-cat.dto.js';
 import { UpdateCatDto } from './dto/update-cat.dto.js';
+import { CreateCatDto_Zod } from 'src/_zod/schemas.js';
 
 @Injectable()
 export class CatService {
-  create(createCatDto: CreateCatDto) {
+  create(createCatDto: CreateCatDto_Zod) {
     return `This action adds a new cat,\n\n${JSON.stringify(createCatDto, null, 4)} \n\ncreated`;
   }
 
