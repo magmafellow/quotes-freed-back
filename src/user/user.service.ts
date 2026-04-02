@@ -55,18 +55,19 @@ export class UserService {
     }
   }
 
-  async findOne(id: number): Promise<TDefaultResponse<ShowUserDto>> {
+  async findOne(id: number): Promise<TDefaultResponse<ShowUserDefaultDto>> {
     try {
       const r = await this.prisma.user.findUniqueOrThrow({
         where: {
           id,
         },
       });
+      const userDefault = makeUserDefaultFromUserFull(r);
       return {
         statusCode: 200,
         message: 'Successfuly found user',
         isError: false,
-        data: r,
+        data: userDefault,
       };
     } catch (error: any) {
       throw new BadRequestException('Database find failed', {
@@ -78,18 +79,19 @@ export class UserService {
   }
   async findOneByUsername(
     username: string,
-  ): Promise<TDefaultResponse<ShowUserDto>> {
+  ): Promise<TDefaultResponse<ShowUserDefaultDto>> {
     try {
       const r = await this.prisma.user.findUniqueOrThrow({
         where: {
           username,
         },
       });
+      const userDefault = makeUserDefaultFromUserFull(r);
       return {
         statusCode: 200,
         message: 'Successfuly found user by username',
         isError: false,
-        data: r,
+        data: userDefault,
       };
     } catch (error: any) {
       throw new BadRequestException('Database find by username failed', {
@@ -103,17 +105,18 @@ export class UserService {
   async update(
     id: number,
     updateUserDto: UpdateUserDto,
-  ): Promise<TDefaultResponse<ShowUserDto>> {
+  ): Promise<TDefaultResponse<ShowUserDefaultDto>> {
     try {
       const r = await this.prisma.user.update({
         data: updateUserDto,
         where: { id },
       });
+      const userDefault = makeUserDefaultFromUserFull(r);
       return {
         statusCode: 200,
         message: 'Successfuly updated user',
         isError: false,
-        data: r,
+        data: userDefault,
       };
     } catch (error: unknown) {
       throw new BadRequestException('Database update failed', {
@@ -124,7 +127,7 @@ export class UserService {
     }
   }
 
-  async remove(id: number): Promise<TDefaultResponse<ShowUserDto>> {
+  async remove(id: number): Promise<TDefaultResponse<ShowUserFullDto>> {
     try {
       const r = await this.prisma.user.delete({ where: { id } });
       return {
